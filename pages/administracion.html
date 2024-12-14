@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calificaciones</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+        body {
+      background-color: #f4f7fa;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+            background-color: #343a40;
+            border-bottom: 3px solid #ff6f61;
+        }
+
+        .navbar-brand {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 1.8rem;
+        }
+
+        .navbar-brand img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+
+        .navbar-nav .nav-link {
+            color: #ffffff;
+            font-weight: 500;
+            padding: 12px 20px;
+        }
+
+
+
+        .navbar-nav .nav-link:hover {
+            color: #ff6f61;
+            background-color: rgba(255, 111, 97, 0.1);
+            border-radius: 5px;
+        }
+
+    main {
+      margin-top: 50px;
+    }
+
+    .container-fluid {
+      background-color: #ffffff;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
+
+    h4 {
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .table {
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .table th,
+    .table td {
+      padding: 12px;
+      vertical-align: middle;
+    }
+
+    .table th {
+      background-color: #d4b8b5;
+      color: #ffffff;
+    }
+
+    .table-hover tbody tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .alert {
+      margin-top: 20px;
+    }
+
+    footer {
+      background-color: #343a40;
+      color: #ffffff;
+      padding: 20px 0;
+      text-align: center;
+    }
+  </style>
+
+<body class="bg-light">
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <img src="./../static/Logo.png" alt="Logo Tienda en Casa">
+            MercaMall
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="./../index.html">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./productos.html">Productos</a>
+                </li>
+               
+                <li class="nav-item">
+                    <a class="nav-link" href="./clientes.html">Cliente</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./administracion.html">Administrador</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+  <main>
+    <div class="container-fluid mt-5 p-4 bg-white shadow rounded">
+      <h4 class="text-center mb-4">Todos los Comentarios</h4>
+      <div id="comentarios-container" class="table-responsive">
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script>
+    async function cargarTodosLosComentarios() {
+    try {
+        const contenedorComentarios = document.getElementById('comentarios-container');
+        contenedorComentarios.innerHTML = ''; 
+
+        const tablaComentarios = document.createElement('table');
+        tablaComentarios.classList.add('table', 'table-striped', 'table-hover', 'table-responsive');
+        
+        tablaComentarios.innerHTML = `
+            <thead class="table-warning">
+                <tr>
+                    <th>Cliente ID</th>
+                    <th>Producto ID</th>
+                    <th>Comentario</th>
+                    <th>Calificación</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-body-comentarios"></tbody>
+        `;
+
+        contenedorComentarios.appendChild(tablaComentarios);
+        const tablaBody = document.getElementById('tabla-body-comentarios');
+
+        const response = await axios.get('http://127.0.0.1:5000/comentarios/todos');
+        
+        if (response.data.length === 0) {
+            tablaBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center text-muted">
+                        No hay comentarios disponibles.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        response.data.forEach(comentario => {
+            const filaComentario = document.createElement('tr');
+            
+            const estrellas = '★'.repeat(comentario.rating) + '☆'.repeat(5 - comentario.rating);
+            
+            filaComentario.innerHTML = `
+                <td>${comentario.customer_name}</td>
+                <td>${comentario.productid}</td>
+                <td>${comentario.comment}</td>
+                <td>${estrellas}</td>
+            `;
+            
+            tablaBody.appendChild(filaComentario);
+        });
+
+    } catch (error) {
+        console.error('Error al cargar comentarios:', error);
+        const contenedorComentarios = document.getElementById('comentarios-container');
+        contenedorComentarios.innerHTML = `
+            <div class="alert alert-danger text-center" role="alert">
+                Error al cargar los comentarios: ${error.message}
+            </div>
+        `;
+    }
+}
+// Llamar a la función para cargar comentarios cuando la página se carga
+document.addEventListener('DOMContentLoaded', cargarTodosLosComentarios);
+
+  // Evento para cargar comentarios cuando se ingresa un ID de producto
+  document.getElementById('productoId').addEventListener('change', function () {
+    const productoId = this.value;
+    if (productoId) {
+      cargarComentarios(productoId);
+    }
+  });
+  </script>
+</body>
+
+</html>
